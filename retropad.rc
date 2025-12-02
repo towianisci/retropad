@@ -1,10 +1,26 @@
+// ============================================================================
+// retropad.rc - Resource Definition File
+// ============================================================================
+// This file defines the application's resources including menus, dialogs,
+// icons, keyboard shortcuts (accelerators), and version information.
+// The resource compiler (rc.exe) compiles this into a binary .res file
+// that gets linked into the final executable.
+// ============================================================================
+
 #include <windows.h>
 #include "resource.h"
 
+// ----------------------------------------------------------------------------
+// Application Icon
+// ----------------------------------------------------------------------------
 IDI_RETROPAD ICON "res/retropad.ico"
 
+// ----------------------------------------------------------------------------
+// Main Menu
+// ----------------------------------------------------------------------------
 IDC_RETROPAD MENU
 BEGIN
+    // File menu - file operations (new, open, save, print)
     POPUP "&File"
     BEGIN
         MENUITEM "&New\tCtrl+N",            IDM_FILE_NEW
@@ -17,6 +33,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                   IDM_FILE_EXIT
     END
+    // Edit menu - text editing operations
     POPUP "&Edit"
     BEGIN
         MENUITEM "&Undo\tCtrl+Z",           IDM_EDIT_UNDO
@@ -34,15 +51,18 @@ BEGIN
         MENUITEM "Select &All\tCtrl+A",     IDM_EDIT_SELECT_ALL
         MENUITEM "Time/&Date\tF5",          IDM_EDIT_TIME_DATE
     END
+    // Format menu - text formatting options
     POPUP "F&ormat"
     BEGIN
         MENUITEM "&Word Wrap",              IDM_FORMAT_WORD_WRAP
         MENUITEM "&Font...",                IDM_FORMAT_FONT
     END
+    // View menu - UI visibility options
     POPUP "&View"
     BEGIN
         MENUITEM "&Status Bar",             IDM_VIEW_STATUS_BAR, CHECKED
     END
+    // Help menu - help and about information
     POPUP "&Help"
     BEGIN
         MENUITEM "View &Help",              IDM_HELP_VIEW_HELP
@@ -50,25 +70,34 @@ BEGIN
     END
 END
 
+// ----------------------------------------------------------------------------
+// Keyboard Accelerators (Shortcuts)
+// ----------------------------------------------------------------------------
+// These define keyboard shortcuts that trigger menu commands
+// Using character codes (0x41 = 'A', 0x4E = 'N', etc.) with VIRTKEY and CONTROL
 IDC_RETROPAD ACCELERATORS
 BEGIN
-    "^N",       IDM_FILE_NEW,       VIRTKEY, CONTROL
-    "^O",       IDM_FILE_OPEN,      VIRTKEY, CONTROL
-    "^S",       IDM_FILE_SAVE,      VIRTKEY, CONTROL
-    "^P",       IDM_FILE_PRINT,     VIRTKEY, CONTROL
-    "^Z",       IDM_EDIT_UNDO,      VIRTKEY, CONTROL
-    "^X",       IDM_EDIT_CUT,       VIRTKEY, CONTROL
-    "^C",       IDM_EDIT_COPY,      VIRTKEY, CONTROL
-    "^V",       IDM_EDIT_PASTE,     VIRTKEY, CONTROL
-    VK_DELETE,  IDM_EDIT_DELETE,    VIRTKEY
-    "^F",       IDM_EDIT_FIND,      VIRTKEY, CONTROL
-    VK_F3,      IDM_EDIT_FIND_NEXT, VIRTKEY
-    "^H",       IDM_EDIT_REPLACE,   VIRTKEY, CONTROL
-    "^G",       IDM_EDIT_GOTO,      VIRTKEY, CONTROL
-    "^A",       IDM_EDIT_SELECT_ALL,VIRTKEY, CONTROL
-    VK_F5,      IDM_EDIT_TIME_DATE, VIRTKEY
+    0x4E,       IDM_FILE_NEW,       VIRTKEY, CONTROL     // Ctrl+N
+    0x4F,       IDM_FILE_OPEN,      VIRTKEY, CONTROL     // Ctrl+O
+    0x53,       IDM_FILE_SAVE,      VIRTKEY, CONTROL     // Ctrl+S
+    0x50,       IDM_FILE_PRINT,     VIRTKEY, CONTROL     // Ctrl+P
+    0x5A,       IDM_EDIT_UNDO,      VIRTKEY, CONTROL     // Ctrl+Z
+    0x58,       IDM_EDIT_CUT,       VIRTKEY, CONTROL     // Ctrl+X
+    0x43,       IDM_EDIT_COPY,      VIRTKEY, CONTROL     // Ctrl+C
+    0x56,       IDM_EDIT_PASTE,     VIRTKEY, CONTROL     // Ctrl+V
+    VK_DELETE,  IDM_EDIT_DELETE,    VIRTKEY              // Del
+    0x46,       IDM_EDIT_FIND,      VIRTKEY, CONTROL     // Ctrl+F
+    VK_F3,      IDM_EDIT_FIND_NEXT, VIRTKEY              // F3
+    0x48,       IDM_EDIT_REPLACE,   VIRTKEY, CONTROL     // Ctrl+H
+    0x47,       IDM_EDIT_GOTO,      VIRTKEY, CONTROL     // Ctrl+G
+    0x41,       IDM_EDIT_SELECT_ALL,VIRTKEY, CONTROL     // Ctrl+A
+    VK_F5,      IDM_EDIT_TIME_DATE, VIRTKEY              // F5
 END
 
+// ----------------------------------------------------------------------------
+// Go To Line Dialog
+// ----------------------------------------------------------------------------
+// Simple dialog for jumping to a specific line number
 IDD_GOTO DIALOGEX 0, 0, 200, 80
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "Go To Line"
@@ -80,16 +109,31 @@ BEGIN
     PUSHBUTTON      "Cancel", IDCANCEL, 120, 44, 50, 14
 END
 
-IDD_ABOUT DIALOGEX 0, 0, 200, 92
+// ----------------------------------------------------------------------------
+// About Dialog
+// ----------------------------------------------------------------------------
+// Displays application information and copyright
+IDD_ABOUT DIALOGEX 0, 0, 280, 140
 STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
 CAPTION "About retropad"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    LTEXT "retropad\nA Petzold-style Notepad clone.\nWin32 / C implementation.", -1, 12, 12, 176, 32
-    LTEXT "© 2025", -1, 12, 48, 60, 10
-    DEFPUSHBUTTON "OK", IDOK, 74, 64, 52, 14
+    ICON            IDI_RETROPAD, -1, 14, 14, 21, 20
+    LTEXT           "retropad", -1, 50, 14, 220, 12, SS_NOPREFIX
+    LTEXT           "Version 1.0", -1, 50, 28, 220, 10
+    LTEXT           "A classic Win32 text editor", -1, 50, 42, 220, 10
+    LTEXT           "", -1, 14, 62, 252, 1, SS_SUNKEN
+    LTEXT           "Built with pure C and the Windows API", -1, 14, 72, 252, 10
+    LTEXT           "Inspired by Charles Petzold's Programming Windows", -1, 14, 84, 252, 10
+    LTEXT           "", -1, 14, 100, 252, 1, SS_SUNKEN
+    LTEXT           "© 2025 PlummersSoftwareLLC", -1, 14, 108, 252, 10
+    DEFPUSHBUTTON   "OK", IDOK, 114, 118, 52, 14
 END
 
+// ----------------------------------------------------------------------------
+// Version Information
+// ----------------------------------------------------------------------------
+// Embedded version data shown in file properties
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 1,0,0,0
  PRODUCTVERSION 1,0,0,0
