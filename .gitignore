@@ -1,0 +1,89 @@
+# ============================================================================
+# .gitignore - Git Exclusion Rules for retropad
+# ============================================================================
+# Excludes build artifacts, temporary files, and IDE-specific files from
+# version control. Only source code and documentation should be committed.
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+# Visual Studio Build Artifacts
+# ----------------------------------------------------------------------------
+# Object files
+*.obj
+
+# Compiled resources
+*.res
+
+# Program database (debug symbols)
+*.pdb
+
+# Incremental linker files
+*.ilk
+
+# Executables
+*.exe
+
+# ----------------------------------------------------------------------------
+# Visual Studio IDE Files
+# ----------------------------------------------------------------------------
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific VS Code files
+.vscode/*.log
+.vscode/.ropeproject
+
+# Visual Studio cache/options
+.vs/
+
+# ----------------------------------------------------------------------------
+# Temporary Files
+# ----------------------------------------------------------------------------
+# Windows thumbnail cache
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin
+$RECYCLE.BIN/
+
+# Temporary build files
+*.tmp
+*.temp
+*.bak
+
+# ----------------------------------------------------------------------------
+# OS-Specific Files
+# ----------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+*.lnk
+
+# ----------------------------------------------------------------------------
+# GitHub Copilot
+# ----------------------------------------------------------------------------
+# Copilot instructions (keep private)
+.github
+
+# ----------------------------------------------------------------------------
+# IDE Specific Files
+# ----------------------------------------------------------------------------
+.vscode
+# ----------------------------------------------------------------------------
+# Other
+# ----------------------------------------------------------------------------
+# Log files
+*.log
+
+# Lock files
+*.lock
