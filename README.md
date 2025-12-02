@@ -72,7 +72,7 @@ Double-click `retropad.exe` or start from a prompt:
 
 ## Features
 - **Classic Menus & Shortcuts**: File, Edit, Format, View, Help with standard Notepad key bindings (Ctrl+N/O/S, Ctrl+F, F3, Ctrl+H, Ctrl+G, F5, etc.)
-- **Word Wrap**: Toggles horizontal scrolling; status bar auto-hides while wrapped, restored when unwrapped
+- **Word Wrap**: Toggles horizontal scrolling; status bar remains visible when word wrap is enabled
 - **Find/Replace**: Standard Windows find/replace dialogs with match case and direction options
 - **Go To Line**: Jump to specific line number (disabled when word wrap is on)
 - **Font Selection**: Choose any installed font via Windows font picker
@@ -80,6 +80,7 @@ Double-click `retropad.exe` or start from a prompt:
 - **Drag & Drop**: Drop files directly into the window to open them
 - **Smart File I/O**: Detects UTF-8/UTF-16/ANSI BOMs, saves with UTF-8 BOM by default
 - **Printing**: Full printing support with page setup dialog for margins and orientation
+- **Settings Persistence**: Word wrap, status bar visibility, and font preferences are saved to the Windows registry and restored on next launch
 - **Application Icon**: Custom icon from `res/retropad.ico`
 
 ## Project Layout
