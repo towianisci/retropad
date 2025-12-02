@@ -1,21 +1,53 @@
 # retropad
 
-A Petzold-style Win32 Notepad clone written in mostly plain C. It keeps the classic menus, accelerators, word wrap toggle, status bar, find/replace, font picker, time/date insertion, and BOM-aware load/save. Printing is intentionally omitted.
+A Petzold-style Win32 Notepad clone written in plain C. Features classic menus, accelerators, word wrap toggle, status bar, find/replace, font picker, time/date insertion, BOM-aware file I/O, and full printing support with page setup.
 
 ## Prerequisites (Windows)
 - Git
-- Visual Studio 2022 (or Build Tools) with the "Desktop development with C++" workload
-- Use a "x64 Native Tools Command Prompt for VS 2022" (or any Developer Command Prompt) so `cl`, `rc`, and `nmake` are on your `PATH`.
+- Visual Studio 2022 or later (or Build Tools) with the "Desktop development with C++" workload
+- PowerShell (included with Windows)
 
 Optional: MinGW-w64 for `make` + `gcc` (a separate POSIX-style `Makefile` is included).
 
 ## Get the code
-```bat
-git clone https://github.com/your/repo.git retropad
+```powershell
+git clone https://github.com/PlummersSoftwareLLC/retropad.git
 cd retropad
 ```
 
-## Build with MSVC (`nmake`)
+## Build with PowerShell Script (Recommended)
+
+The easiest way to build retropad is using the included `build.ps1` script. It automatically:
+- Detects your Visual Studio installation (2017-2026, any edition)
+- Sets up the build environment
+- Cleans previous build artifacts
+- Compiles all source files
+- Outputs everything to the `binaries\` folder
+
+**To build:**
+```powershell
+.\build.ps1
+```
+
+The script will:
+1. Search for Visual Studio installations (newest first)
+2. Clean the `binaries\` folder
+3. Compile `retropad.c` and `file_io.c`
+4. Compile resources from `retropad.rc`
+5. Link everything into `binaries\retropad.exe`
+
+**Build output:**
+- `binaries\retropad.exe` - The executable
+- `binaries\*.obj` - Object files
+- `binaries\retropad.res` - Compiled resources
+- `binaries\*.pdb` - Debug symbols
+
+**Troubleshooting:**
+- If Visual Studio isn't found, install the "Desktop development with C++" workload
+- The script searches these VS versions: 2026, 2025, 2024, 2023, 2022, 2021, 2019, 2017
+- It checks all editions: Community, Professional, Enterprise, BuildTools
+
+## Build with MSVC (`nmake`) - Alternative
 From a Developer Command Prompt:
 ```bat
 nmake /f makefile
@@ -38,25 +70,31 @@ Double-click `retropad.exe` or start from a prompt:
 .\retropad.exe
 ```
 
-## Features & notes
-- Menus/accelerators: File, Edit, Format, View, Help; classic Notepad key bindings (Ctrl+N/O/S, Ctrl+F, F3, Ctrl+H, Ctrl+G, F5, etc.).
-- Word Wrap toggles horizontal scrolling; status bar auto-hides while wrapped, restored when unwrapped.
-- Find/Replace dialogs (standard `FINDMSGSTRING`), Go To (disabled when word wrap is on).
-- Font picker (ChooseFont), time/date insertion, drag-and-drop to open files.
-- File I/O: detects UTF-8/UTF-16 BOMs, falls back to UTF-8/ANSI heuristic; saves with UTF-8 BOM by default.
-- Printing/page setup menu items show a “not implemented” notice by design.
-- Icon: linked as the main app icon from `res/retropad.ico` via `retropad.rc`.
+## Features
+- **Classic Menus & Shortcuts**: File, Edit, Format, View, Help with standard Notepad key bindings (Ctrl+N/O/S, Ctrl+F, F3, Ctrl+H, Ctrl+G, F5, etc.)
+- **Word Wrap**: Toggles horizontal scrolling; status bar auto-hides while wrapped, restored when unwrapped
+- **Find/Replace**: Standard Windows find/replace dialogs with match case and direction options
+- **Go To Line**: Jump to specific line number (disabled when word wrap is on)
+- **Font Selection**: Choose any installed font via Windows font picker
+- **Time/Date**: Insert current time and date at cursor position (F5)
+- **Drag & Drop**: Drop files directly into the window to open them
+- **Smart File I/O**: Detects UTF-8/UTF-16/ANSI BOMs, saves with UTF-8 BOM by default
+- **Printing**: Full printing support with page setup dialog for margins and orientation
+- **Application Icon**: Custom icon from `res/retropad.ico`
 
-## Project layout
-- `retropad.c` — WinMain, window proc, UI logic, find/replace, menus, layout.
-- `file_io.c/.h` — file open/save dialogs and encoding-aware load/save helpers.
-- `resource.h` — resource IDs.
-- `retropad.rc` — menus, accelerators, dialogs, version info, icon.
-- `res/retropad.ico` — application icon.
-- `makefile` — MSVC `nmake` build script.
-- `Makefile` — MinGW/GNU make build script.
+## Project Layout
+- `retropad.c` — Main application: WinMain, window procedure, UI logic, find/replace, menus, printing
+- `file_io.c/.h` — File operations with encoding detection and conversion
+- `resource.h` — Resource ID definitions
+- `retropad.rc` — Resource definitions: menus, accelerators, dialogs, version info, icon
+- `res/retropad.ico` — Application icon
+- `build.ps1` — PowerShell build script (recommended)
+- `makefile` — MSVC `nmake` build script (alternative)
+- `Makefile` — MinGW/GNU make build script (optional)
+- `binaries/` — Build output directory (not in source control)
 
-## Common build hiccups
-- If `nmake` is missing, use a Developer Command Prompt (it sets up `PATH`).
-- If you see RC4204 warnings about ASCII/virtual keys, they’re benign and come from control-key accelerator lines.
-- If `rc`/`cl` aren’t found, rerun `vcvarsall.bat` or reopen the Developer Command Prompt.
+## Notes
+- All source code is fully commented for easy understanding
+- Build script automatically detects Visual Studio installation
+- Clean build performed automatically before each compile
+- Debug symbols (PDB files) included for debugging support
