@@ -69,7 +69,7 @@ foreach ($path in $VSPaths) {
 # Compiler flags
 $CFlags = "/nologo /DUNICODE /D_UNICODE /W4 /EHsc /Zi /Od"
 $LDFlags = "/nologo"
-$Libs = "user32.lib gdi32.lib comdlg32.lib comctl32.lib shell32.lib"
+$Libs = "user32.lib gdi32.lib comdlg32.lib comctl32.lib shell32.lib advapi32.lib"
 
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "  retropad Build Script" -ForegroundColor Cyan

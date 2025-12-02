@@ -34,6 +34,10 @@
 #define DEFAULT_WIDTH  640              // Default window width in pixels
 #define DEFAULT_HEIGHT 480              // Default window height in pixels
 
+// Registry settings
+#define REG_KEY_PATH   L"Software\\retropad"  // Registry path for settings
+#define REG_WORD_WRAP  L"WordWrap"            // Word wrap setting name
+
 // ============================================================================
 // Application State Structure
 // ============================================================================
@@ -104,6 +108,10 @@ static BOOL LoadDocumentFromPath(HWND hwnd, LPCWSTR path); // Load file from pat
 static void SetWordWrap(HWND hwnd, BOOL enabled);      // Toggle word wrap mode
 static void DoSelectFont(HWND hwnd);                   // Show font selection dialog
 static void InsertTimeDate(HWND hwnd);                 // Insert current time/date at cursor
+
+// Settings Persistence
+static BOOL LoadWordWrapSetting(void);                 // Load word wrap from registry
+static void SaveWordWrapSetting(BOOL enabled);         // Save word wrap to registry
 
 // Print Operations
 static void DoPageSetup(HWND hwnd);                    // Show page setup dialog
@@ -664,14 +672,62 @@ static void DoFileNew(HWND hwnd) {
 }
 
 // ============================================================================
+// LoadWordWrapSetting - Load Word Wrap Setting from Registry
+// ============================================================================
+// Reads the saved word wrap preference from the Windows registry.
+// Returns TRUE if word wrap was previously enabled, FALSE otherwise.
+// Default is FALSE if no setting exists.
+// ============================================================================
+static BOOL LoadWordWrapSetting(void) {
+    HKEY hKey;
+    BOOL wordWrap = FALSE;  // Default to OFF
+    
+    // Try to open registry key
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        DWORD value = 0;
+        DWORD size = sizeof(DWORD);
+        DWORD type = REG_DWORD;
+        
+        // Read the word wrap setting
+        if (RegQueryValueExW(hKey, REG_WORD_WRAP, NULL, &type, (BYTE*)&value, &size) == ERROR_SUCCESS) {
+            wordWrap = (value != 0);
+        }
+        
+        RegCloseKey(hKey);
+    }
+    
+    return wordWrap;
+}
+
+// ============================================================================
+// SaveWordWrapSetting - Save Word Wrap Setting to Registry
+// ============================================================================
+// Saves the current word wrap preference to the Windows registry so it
+// persists across application sessions.
+// ============================================================================
+static void SaveWordWrapSetting(BOOL enabled) {
+    HKEY hKey;
+    
+    // Create or open registry key
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, NULL, 0, 
+                        KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+        DWORD value = enabled ? 1 : 0;
+        
+        // Write the word wrap setting
+        RegSetValueExW(hKey, REG_WORD_WRAP, 0, REG_DWORD, (BYTE*)&value, sizeof(DWORD));
+        
+        RegCloseKey(hKey);
+    }
+}
+
+// ============================================================================
 // SetWordWrap - Toggle Word Wrap Mode
 // ============================================================================
 // Enables or disables word wrap in the editor. When word wrap changes:
 // - Edit control must be recreated (different styles required)
 // - Text and cursor position are preserved
-// - Status bar and "Go To" are disabled when word wrap is ON (line numbers
-//   become meaningless with wrapping)
-// - When disabling wrap, previous status bar visibility is restored
+// - "Go To" is disabled when word wrap is ON (line numbers change with wrapping)
+// - Status bar remains visible and shows current position
 // ============================================================================
 static void SetWordWrap(HWND hwnd, BOOL enabled) {
     // Nothing to do if already in desired state
@@ -698,18 +754,16 @@ static void SetWordWrap(HWND hwnd, BOOL enabled) {
     HeapFree(GetProcessHeap(), 0, text);
 
     if (enabled) {
-        // Word wrap ON: Hide status bar and disable related features
-        // (line/column numbers are meaningless with word wrap)
-        g_app.statusBeforeWrap = g_app.statusVisible;  // Remember for later
-        ToggleStatusBar(hwnd, FALSE);
-        EnableMenuItem(GetMenu(hwnd), IDM_VIEW_STATUS_BAR, MF_BYCOMMAND | MF_GRAYED);
+        // Word wrap ON: Disable "Go To" (line numbers change with wrapping)
         EnableMenuItem(GetMenu(hwnd), IDM_EDIT_GOTO, MF_BYCOMMAND | MF_GRAYED);
     } else {
-        // Word wrap OFF: Restore previous status bar state, enable features
-        ToggleStatusBar(hwnd, g_app.statusBeforeWrap);
-        EnableMenuItem(GetMenu(hwnd), IDM_VIEW_STATUS_BAR, MF_BYCOMMAND | MF_ENABLED);
+        // Word wrap OFF: Re-enable "Go To"
         EnableMenuItem(GetMenu(hwnd), IDM_EDIT_GOTO, MF_BYCOMMAND | MF_ENABLED);
     }
+    
+    // Save word wrap preference to registry
+    SaveWordWrapSetting(enabled);
+    
     UpdateTitle(hwnd);
     UpdateStatusBar(hwnd);
 }
@@ -1078,16 +1132,9 @@ static void UpdateMenuStates(HWND hwnd) {
     CheckMenuItem(menu, IDM_VIEW_STATUS_BAR, MF_BYCOMMAND | statusState);
 
     // "Go To" is only available when word wrap is OFF
-    // (line numbers are meaningless with word wrap)
+    // (line numbers change with word wrap)
     BOOL canGoTo = !g_app.wordWrap;
     EnableMenuItem(menu, IDM_EDIT_GOTO, MF_BYCOMMAND | (canGoTo ? MF_ENABLED : MF_GRAYED));
-    
-    // Status bar menu item disabled when word wrap is ON
-    if (g_app.wordWrap) {
-        EnableMenuItem(menu, IDM_VIEW_STATUS_BAR, MF_BYCOMMAND | MF_GRAYED);
-    } else {
-        EnableMenuItem(menu, IDM_VIEW_STATUS_BAR, MF_BYCOMMAND | MF_ENABLED);
-    }
 
     // "Save" enabled only if document has been modified
     BOOL modified = (SendMessageW(g_app.hwndEdit, EM_GETMODIFY, 0, 0) != 0);
@@ -1470,6 +1517,12 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
         
         // Create and show status bar
         ToggleStatusBar(hwnd, TRUE);
+        
+        // Load and apply saved word wrap setting
+        BOOL savedWordWrap = LoadWordWrapSetting();
+        if (savedWordWrap) {
+            SetWordWrap(hwnd, TRUE);
+        }
         
         // Set initial title and status
         UpdateTitle(hwnd);
