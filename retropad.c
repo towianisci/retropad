@@ -37,6 +37,7 @@
 // Registry settings
 #define REG_KEY_PATH   L"Software\\retropad"  // Registry path for settings
 #define REG_WORD_WRAP  L"WordWrap"            // Word wrap setting name
+#define REG_STATUS_BAR L"StatusBar"           // Status bar setting name
 
 // ============================================================================
 // Application State Structure
@@ -112,6 +113,8 @@ static void InsertTimeDate(HWND hwnd);                 // Insert current time/da
 // Settings Persistence
 static BOOL LoadWordWrapSetting(void);                 // Load word wrap from registry
 static void SaveWordWrapSetting(BOOL enabled);         // Save word wrap to registry
+static BOOL LoadStatusBarSetting(void);                // Load status bar from registry
+static void SaveStatusBarSetting(BOOL enabled);        // Save status bar to registry
 
 // Print Operations
 static void DoPageSetup(HWND hwnd);                    // Show page setup dialog
@@ -473,6 +476,9 @@ static void ToggleStatusBar(HWND hwnd, BOOL visible) {
     // Resize edit control to account for status bar visibility
     UpdateLayout(hwnd);
     UpdateStatusBar(hwnd);
+    
+    // Save status bar preference to registry
+    SaveStatusBarSetting(visible);
 }
 
 // ============================================================================
@@ -717,6 +723,57 @@ static void SaveWordWrapSetting(BOOL enabled) {
         
         // Write the word wrap setting
         RegSetValueExW(hKey, REG_WORD_WRAP, 0, REG_DWORD, (BYTE*)&value, sizeof(DWORD));
+        
+        RegCloseKey(hKey);
+    }
+}
+
+// ============================================================================
+// LoadStatusBarSetting - Load Status Bar Setting from Registry
+// ============================================================================
+// Reads the saved status bar visibility preference from the Windows registry.
+// Returns TRUE if status bar was previously visible, FALSE otherwise.
+// Default is TRUE if no setting exists.
+// ============================================================================
+static BOOL LoadStatusBarSetting(void) {
+    HKEY hKey = NULL;
+    BOOL statusBar = TRUE;  // Default to ON
+    
+    // Try to open registry key
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+        return statusBar;  // Key doesn't exist or can't be opened
+    }
+    
+    // Read the status bar setting
+    DWORD value = 0;
+    DWORD size = sizeof(DWORD);
+    DWORD type = REG_DWORD;
+    
+    if (RegQueryValueExW(hKey, REG_STATUS_BAR, NULL, &type, (BYTE*)&value, &size) == ERROR_SUCCESS) {
+        statusBar = (value != 0);
+    }
+    
+    // Always close the key before returning
+    RegCloseKey(hKey);
+    return statusBar;
+}
+
+// ============================================================================
+// SaveStatusBarSetting - Save Status Bar Setting to Registry
+// ============================================================================
+// Saves the current status bar visibility preference to the Windows registry
+// so it persists across application sessions.
+// ============================================================================
+static void SaveStatusBarSetting(BOOL enabled) {
+    HKEY hKey;
+    
+    // Create or open registry key
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, NULL, 0, 
+                        KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+        DWORD value = enabled ? 1 : 0;
+        
+        // Write the status bar setting
+        RegSetValueExW(hKey, REG_STATUS_BAR, 0, REG_DWORD, (BYTE*)&value, sizeof(DWORD));
         
         RegCloseKey(hKey);
     }
@@ -1517,8 +1574,9 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
         // Create the main edit control
         CreateEditControl(hwnd);
         
-        // Create and show status bar
-        ToggleStatusBar(hwnd, TRUE);
+        // Load and apply saved status bar setting
+        BOOL savedStatusBar = LoadStatusBarSetting();
+        ToggleStatusBar(hwnd, savedStatusBar);
         
         // Load and apply saved word wrap setting
         BOOL savedWordWrap = LoadWordWrapSetting();
