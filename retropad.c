@@ -679,23 +679,25 @@ static void DoFileNew(HWND hwnd) {
 // Default is FALSE if no setting exists.
 // ============================================================================
 static BOOL LoadWordWrapSetting(void) {
-    HKEY hKey;
+    HKEY hKey = NULL;
     BOOL wordWrap = FALSE;  // Default to OFF
     
     // Try to open registry key
-    if (RegOpenKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-        DWORD value = 0;
-        DWORD size = sizeof(DWORD);
-        DWORD type = REG_DWORD;
-        
-        // Read the word wrap setting
-        if (RegQueryValueExW(hKey, REG_WORD_WRAP, NULL, &type, (BYTE*)&value, &size) == ERROR_SUCCESS) {
-            wordWrap = (value != 0);
-        }
-        
-        RegCloseKey(hKey);
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+        return wordWrap;  // Key doesn't exist or can't be opened
     }
     
+    // Read the word wrap setting
+    DWORD value = 0;
+    DWORD size = sizeof(DWORD);
+    DWORD type = REG_DWORD;
+    
+    if (RegQueryValueExW(hKey, REG_WORD_WRAP, NULL, &type, (BYTE*)&value, &size) == ERROR_SUCCESS) {
+        wordWrap = (value != 0);
+    }
+    
+    // Always close the key before returning
+    RegCloseKey(hKey);
     return wordWrap;
 }
 
