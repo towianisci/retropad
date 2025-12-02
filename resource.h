@@ -60,7 +60,7 @@
 // ============================================================================
 // Help Menu Commands (40050-40059)
 // ============================================================================
-#define IDM_HELP_VIEW_HELP      40050  // View help (not implemented)
+#define IDM_HELP_VIEW_HELP      40050  // View help dialog
 #define IDM_HELP_ABOUT          40051  // Show About dialog
 
 // ============================================================================
@@ -68,5 +68,6 @@
 // ============================================================================
 #define IDD_GOTO                50001  // Go To Line dialog
 #define IDD_ABOUT               50002  // About dialog
+#define IDD_HELP                50003  // Help dialog
 #define IDC_GOTO_EDIT           50010  // Edit control in Go To dialog
 

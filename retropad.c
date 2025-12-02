@@ -117,6 +117,7 @@ static void HandleFindReplace(LPFINDREPLACE lpfr);     // Process Find/Replace m
 
 // Dialog Procedures
 static INT_PTR CALLBACK GoToDlgProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam);
+static INT_PTR CALLBACK HelpDlgProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam);
 static INT_PTR CALLBACK AboutDlgProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // ============================================================================
@@ -1186,14 +1187,12 @@ static void DoPrint(HWND hwnd) {
     }
     
     // Get printer capabilities
-    int pageWidth = GetDeviceCaps(hdc, HORZRES);
     int pageHeight = GetDeviceCaps(hdc, VERTRES);
     int logPixelsY = GetDeviceCaps(hdc, LOGPIXELSY);
     
     // Calculate margins (convert from 1/1000 inch to pixels)
     int leftMargin = (g_app.pageSetup.rtMargin.left * logPixelsY) / 1000;
     int topMargin = (g_app.pageSetup.rtMargin.top * logPixelsY) / 1000;
-    int rightMargin = (g_app.pageSetup.rtMargin.right * logPixelsY) / 1000;
     int bottomMargin = (g_app.pageSetup.rtMargin.bottom * logPixelsY) / 1000;
     
     // Calculate printable area
@@ -1369,14 +1368,41 @@ static void HandleCommand(HWND hwnd, WPARAM wParam, LPARAM lParam) {
     // Help Menu Commands
     // ------------------------------------------------------------------------
     case IDM_HELP_VIEW_HELP:
-        // Not implemented
-        MessageBoxW(hwnd, L"No help file is available for retropad.", APP_TITLE, MB_ICONINFORMATION);
+        // Show modal Help dialog with keyboard shortcuts and usage
+        DialogBoxW(g_hInst, MAKEINTRESOURCE(IDD_HELP), hwnd, HelpDlgProc);
         break;
     case IDM_HELP_ABOUT:
         // Show modal About dialog
         DialogBoxW(g_hInst, MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDlgProc);
         break;
     }
+}
+
+// ============================================================================
+// HelpDlgProc - Dialog Procedure for Help Dialog
+// ============================================================================
+// Displays usage instructions and keyboard shortcuts for the application.
+// ============================================================================
+static INT_PTR CALLBACK HelpDlgProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam) {
+    UNREFERENCED_PARAMETER(lParam);
+    
+    switch (msg) {
+    // Dialog initialization
+    case WM_INITDIALOG:
+        // Return TRUE to set focus to default control
+        return TRUE;
+    
+    // Button clicks
+    case WM_COMMAND:
+        // Close dialog on OK or Cancel button
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+            EndDialog(dlg, LOWORD(wParam));
+            return TRUE;  // Message handled
+        }
+        break;
+    }
+    // Return FALSE for unhandled messages
+    return FALSE;
 }
 
 // ============================================================================

@@ -131,6 +131,80 @@ BEGIN
 END
 
 // ----------------------------------------------------------------------------
+// Help Dialog
+// ----------------------------------------------------------------------------
+// Displays usage instructions and keyboard shortcuts
+IDD_HELP DIALOGEX 0, 0, 420, 380
+STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "retropad Help"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "retropad - Quick Reference", -1, 14, 10, 392, 12, SS_NOPREFIX
+    LTEXT           "", -1, 14, 26, 392, 1, SS_SUNKEN
+    
+    // File Operations
+    LTEXT           "FILE OPERATIONS", -1, 14, 34, 120, 10
+    LTEXT           "Ctrl+N", -1, 14, 48, 80, 8
+    LTEXT           "Create new document", -1, 100, 48, 300, 8
+    LTEXT           "Ctrl+O", -1, 14, 58, 80, 8
+    LTEXT           "Open existing file", -1, 100, 58, 300, 8
+    LTEXT           "Ctrl+S", -1, 14, 68, 80, 8
+    LTEXT           "Save current document", -1, 100, 68, 300, 8
+    LTEXT           "Ctrl+P", -1, 14, 78, 80, 8
+    LTEXT           "Print document", -1, 100, 78, 300, 8
+    
+    LTEXT           "", -1, 14, 92, 392, 1, SS_SUNKEN
+    
+    // Edit Operations
+    LTEXT           "EDITING", -1, 14, 100, 120, 10
+    LTEXT           "Ctrl+Z", -1, 14, 114, 80, 8
+    LTEXT           "Undo last change", -1, 100, 114, 300, 8
+    LTEXT           "Ctrl+X", -1, 14, 124, 80, 8
+    LTEXT           "Cut selection to clipboard", -1, 100, 124, 300, 8
+    LTEXT           "Ctrl+C", -1, 14, 134, 80, 8
+    LTEXT           "Copy selection to clipboard", -1, 100, 134, 300, 8
+    LTEXT           "Ctrl+V", -1, 14, 144, 80, 8
+    LTEXT           "Paste from clipboard", -1, 100, 144, 300, 8
+    LTEXT           "Ctrl+A", -1, 14, 154, 80, 8
+    LTEXT           "Select all text", -1, 100, 154, 300, 8
+    LTEXT           "Del", -1, 14, 164, 80, 8
+    LTEXT           "Delete selection", -1, 100, 164, 300, 8
+    
+    LTEXT           "", -1, 14, 178, 392, 1, SS_SUNKEN
+    
+    // Search Operations
+    LTEXT           "FIND & REPLACE", -1, 14, 186, 120, 10
+    LTEXT           "Ctrl+F", -1, 14, 200, 80, 8
+    LTEXT           "Open Find dialog", -1, 100, 200, 300, 8
+    LTEXT           "F3", -1, 14, 210, 80, 8
+    LTEXT           "Find next occurrence", -1, 100, 210, 300, 8
+    LTEXT           "Ctrl+H", -1, 14, 220, 80, 8
+    LTEXT           "Open Replace dialog", -1, 100, 220, 300, 8
+    LTEXT           "Ctrl+G", -1, 14, 230, 80, 8
+    LTEXT           "Go to line number (disabled in word wrap)", -1, 100, 230, 300, 8
+    
+    LTEXT           "", -1, 14, 244, 392, 1, SS_SUNKEN
+    
+    // Formatting
+    LTEXT           "FORMATTING", -1, 14, 252, 120, 10
+    LTEXT           "F5", -1, 14, 266, 80, 8
+    LTEXT           "Insert current time and date", -1, 100, 266, 300, 8
+    LTEXT           "Format Menu", -1, 14, 276, 80, 8
+    LTEXT           "Toggle word wrap, select font", -1, 100, 276, 300, 8
+    
+    LTEXT           "", -1, 14, 290, 392, 1, SS_SUNKEN
+    
+    // Features
+    LTEXT           "FEATURES", -1, 14, 298, 120, 10
+    LTEXT           "• Drag and drop files to open them", -1, 14, 312, 392, 8
+    LTEXT           "• Automatic encoding detection (UTF-8, UTF-16, ANSI)", -1, 14, 322, 392, 8
+    LTEXT           "• Status bar shows line and column numbers", -1, 14, 332, 392, 8
+    LTEXT           "• Word wrap automatically hides status bar", -1, 14, 342, 392, 8
+    
+    DEFPUSHBUTTON   "OK", IDOK, 184, 358, 52, 14
+END
+
+// ----------------------------------------------------------------------------
 // Version Information
 // ----------------------------------------------------------------------------
 // Embedded version data shown in file properties
