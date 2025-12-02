@@ -73,6 +73,7 @@ Double-click `retropad.exe` or start from a prompt:
 ## Features
 - **Classic Menus & Shortcuts**: File, Edit, Format, View, Help with standard Notepad key bindings (Ctrl+N/O/S, Ctrl+F, F3, Ctrl+H, Ctrl+G, F5, etc.)
 - **Word Wrap**: Toggles horizontal scrolling; status bar remains visible when word wrap is enabled
+- **Status Bar**: Displays line number, column position, total lines, and current file encoding (UTF-8, UTF-16 LE/BE, ANSI)
 - **Find/Replace**: Standard Windows find/replace dialogs with match case and direction options
 - **Go To Line**: Jump to specific line number (disabled when word wrap is on)
 - **Font Selection**: Choose any installed font via Windows font picker
