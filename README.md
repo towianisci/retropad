@@ -11,7 +11,7 @@ Optional: MinGW-w64 for `make` + `gcc` (a separate POSIX-style `Makefile` is inc
 
 ## Get the code
 ```powershell
-git clone https://github.com/PlummersSoftwareLLC/retropad.git
+git clone https://github.com/towianisci/retropad.git
 cd retropad
 ```
 
