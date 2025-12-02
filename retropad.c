@@ -38,6 +38,10 @@
 #define REG_KEY_PATH   L"Software\\retropad"  // Registry path for settings
 #define REG_WORD_WRAP  L"WordWrap"            // Word wrap setting name
 #define REG_STATUS_BAR L"StatusBar"           // Status bar setting name
+#define REG_FONT_NAME  L"FontName"            // Font face name
+#define REG_FONT_SIZE  L"FontSize"            // Font size (height)
+#define REG_FONT_WEIGHT L"FontWeight"         // Font weight (bold)
+#define REG_FONT_ITALIC L"FontItalic"         // Font italic style
 
 // ============================================================================
 // Application State Structure
@@ -115,6 +119,8 @@ static BOOL LoadWordWrapSetting(void);                 // Load word wrap from re
 static void SaveWordWrapSetting(BOOL enabled);         // Save word wrap to registry
 static BOOL LoadStatusBarSetting(void);                // Load status bar from registry
 static void SaveStatusBarSetting(BOOL enabled);        // Save status bar to registry
+static HFONT LoadFontSetting(void);                    // Load font from registry
+static void SaveFontSetting(const LOGFONTW *lf);       // Save font to registry
 
 // Print Operations
 static void DoPageSetup(HWND hwnd);                    // Show page setup dialog
@@ -780,6 +786,96 @@ static void SaveStatusBarSetting(BOOL enabled) {
 }
 
 // ============================================================================
+// LoadFontSetting - Load Font Setting from Registry
+// ============================================================================
+// Reads the saved font preference from the Windows registry and creates
+// a font handle. Returns NULL if no saved font or if font creation fails.
+// ============================================================================
+static HFONT LoadFontSetting(void) {
+    HKEY hKey = NULL;
+    HFONT hFont = NULL;
+    
+    // Try to open registry key
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+        return NULL;  // Key doesn't exist or can't be opened
+    }
+    
+    LOGFONTW lf = {0};
+    DWORD size, type;
+    BOOL hasFont = FALSE;
+    
+    // Read font name
+    size = sizeof(lf.lfFaceName);
+    if (RegQueryValueExW(hKey, REG_FONT_NAME, NULL, &type, (BYTE*)lf.lfFaceName, &size) == ERROR_SUCCESS) {
+        hasFont = TRUE;
+    }
+    
+    // Read font size (height)
+    size = sizeof(DWORD);
+    DWORD height = 0;
+    if (RegQueryValueExW(hKey, REG_FONT_SIZE, NULL, &type, (BYTE*)&height, &size) == ERROR_SUCCESS) {
+        lf.lfHeight = (LONG)height;
+    }
+    
+    // Read font weight
+    size = sizeof(DWORD);
+    DWORD weight = 0;
+    if (RegQueryValueExW(hKey, REG_FONT_WEIGHT, NULL, &type, (BYTE*)&weight, &size) == ERROR_SUCCESS) {
+        lf.lfWeight = (LONG)weight;
+    }
+    
+    // Read font italic
+    size = sizeof(DWORD);
+    DWORD italic = 0;
+    if (RegQueryValueExW(hKey, REG_FONT_ITALIC, NULL, &type, (BYTE*)&italic, &size) == ERROR_SUCCESS) {
+        lf.lfItalic = (BYTE)italic;
+    }
+    
+    RegCloseKey(hKey);
+    
+    // Create font if we have valid font data
+    if (hasFont && lf.lfFaceName[0] != L'\0') {
+        hFont = CreateFontIndirectW(&lf);
+    }
+    
+    return hFont;
+}
+
+// ============================================================================
+// SaveFontSetting - Save Font Setting to Registry
+// ============================================================================
+// Saves the current font to the Windows registry so it persists across
+// application sessions.
+// ============================================================================
+static void SaveFontSetting(const LOGFONTW *lf) {
+    HKEY hKey;
+    
+    if (!lf) return;
+    
+    // Create or open registry key
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, REG_KEY_PATH, 0, NULL, 0, 
+                        KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS) {
+        // Write font name
+        size_t nameLen = (wcslen(lf->lfFaceName) + 1) * sizeof(WCHAR);
+        RegSetValueExW(hKey, REG_FONT_NAME, 0, REG_SZ, (BYTE*)lf->lfFaceName, (DWORD)nameLen);
+        
+        // Write font size (height)
+        DWORD height = (DWORD)lf->lfHeight;
+        RegSetValueExW(hKey, REG_FONT_SIZE, 0, REG_DWORD, (BYTE*)&height, sizeof(DWORD));
+        
+        // Write font weight
+        DWORD weight = (DWORD)lf->lfWeight;
+        RegSetValueExW(hKey, REG_FONT_WEIGHT, 0, REG_DWORD, (BYTE*)&weight, sizeof(DWORD));
+        
+        // Write font italic
+        DWORD italic = (DWORD)lf->lfItalic;
+        RegSetValueExW(hKey, REG_FONT_ITALIC, 0, REG_DWORD, (BYTE*)&italic, sizeof(DWORD));
+        
+        RegCloseKey(hKey);
+    }
+}
+
+// ============================================================================
 // SetWordWrap - Toggle Word Wrap Mode
 // ============================================================================
 // Enables or disables word wrap in the editor. When word wrap changes:
@@ -1060,6 +1156,9 @@ static void DoSelectFont(HWND hwnd) {
             ApplyFontToEdit(g_app.hwndEdit, g_app.hFont);
             // Redraw to show new font
             UpdateLayout(hwnd);
+            
+            // Save font preference to registry
+            SaveFontSetting(&lf);
         }
     }
 }
@@ -1570,6 +1669,9 @@ static LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
         // Initialize common controls library (needed for status bar)
         INITCOMMONCONTROLSEX icc = { sizeof(icc), ICC_BAR_CLASSES };
         InitCommonControlsEx(&icc);
+        
+        // Load and apply saved font setting
+        g_app.hFont = LoadFontSetting();
         
         // Create the main edit control
         CreateEditControl(hwnd);
