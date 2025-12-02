@@ -924,12 +924,28 @@ static void SetWordWrap(HWND hwnd, BOOL enabled) {
 }
 
 // ============================================================================
+// GetEncodingName - Get Display Name for Encoding
+// ============================================================================
+// Returns a human-readable string for the given text encoding type.
+// ============================================================================
+static const WCHAR* GetEncodingName(TextEncoding encoding) {
+    switch (encoding) {
+        case ENC_UTF8:    return L"UTF-8";
+        case ENC_UTF16LE: return L"UTF-16 LE";
+        case ENC_UTF16BE: return L"UTF-16 BE";
+        case ENC_ANSI:    return L"ANSI";
+        default:          return L"Unknown";
+    }
+}
+
+// ============================================================================
 // UpdateStatusBar - Refresh Status Bar with Current Position Info
 // ============================================================================
 // Updates the status bar to show:
 // - Current line number (Ln)
 // - Current column number (Col)
 // - Total number of lines in document
+// - Text encoding (right side)
 // Called whenever cursor moves or text changes.
 // ============================================================================
 static void UpdateStatusBar(HWND hwnd) {
@@ -952,10 +968,23 @@ static void UpdateStatusBar(HWND hwnd) {
     // Get total line count
     int lines = (int)SendMessageW(g_app.hwndEdit, EM_GETLINECOUNT, 0, 0);
 
-    // Format and display status text
+    // Set up status bar with two parts: main text (left) and encoding (right)
+    // -1 means the part extends to the right edge
+    int parts[2] = { -1, -1 };
+    RECT rc;
+    GetClientRect(g_app.hwndStatus, &rc);
+    parts[0] = rc.right - 100;  // Encoding part is 100 pixels wide
+    parts[1] = -1;               // Extends to right edge
+    SendMessageW(g_app.hwndStatus, SB_SETPARTS, 2, (LPARAM)parts);
+
+    // Format and display status text in first part (part 0)
     WCHAR status[128];
     StringCchPrintfW(status, ARRAYSIZE(status), L"Ln %d, Col %d    Lines: %d", line, col, lines);
     SendMessageW(g_app.hwndStatus, SB_SETTEXT, 0, (LPARAM)status);
+    
+    // Display encoding in second part (part 1)
+    const WCHAR *encodingName = GetEncodingName(g_app.encoding);
+    SendMessageW(g_app.hwndStatus, SB_SETTEXT, 1, (LPARAM)encodingName);
 }
 
 // ============================================================================
